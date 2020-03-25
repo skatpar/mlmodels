@@ -141,7 +141,7 @@ def create_tabular_dataset(path_train, path_valid,
 
     except Exception:
         log( f"Download {lang}")
-        os.system( f"python -m spacy download {lang}")
+        os.system( f"python -m spacy download {lang}_core_web_sm")
         sleep(60)
         spacy_en = spacy.load( f'{lang}_core_web_sm', disable= disable)  
 
