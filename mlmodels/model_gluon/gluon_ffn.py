@@ -16,8 +16,11 @@ import pandas as pd
 from gluonts.model.simple_feedforward import SimpleFeedForwardEstimator
 from gluonts.trainer import Trainer
 from mlmodels.model_gluon.util import (
-    _config_process, fit, get_dataset, load, log, metrics,
-    os_package_root_path, plot_predict, plot_prob_forecasts, predict, save)
+    _config_process, fit, get_dataset, load, metrics,
+    plot_predict, plot_prob_forecasts, predict, save)
+
+
+from mlmodels.util import path_norm, os_package_root_path, log
 
 VERBOSE = False
 
@@ -49,17 +52,25 @@ class Model(object) :
 
 
 def get_params(choice="", data_path="dataset/timeseries/", config_mode="test", **kw):
-    from mlmodels.util import path_local_setup
+    import json
+    #pp = param_pars
+    #choice = pp['choice']
+    #config_mode = pp['config_mode']
+    #data_path = pp['data_path']
+
 
     if choice == "json":
-       return _config_process(data_path, config_mode=config_mode)
+        data_path = path_norm(data_path)
+        cf = json.load(open(data_path, 'rb'))
+        cf = cf[config_mode]
+        return cf['model_pars'], cf['data_pars'], cf['compute_pars'], cf['out_pars']
 
 
     if choice == "test01":
         log("#### Path params   #####################################################")
-        data_path, out_path, model_path = path_local_setup( __file__, sublevel=0,
-                                                           out_folder="ztest/gluon_ffn/", 
-                                                           data_path=data_path)
+        data_path  = path_norm("dataset/timeseries/")
+        out_path   = path_norm("ztest/model_gluon/gluon_prophet/" )
+        model_path = os.path.join(out_path, "model")
 
 
         train_data_path = data_path + "GLUON-train.csv"

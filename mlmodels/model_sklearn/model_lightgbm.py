@@ -193,16 +193,16 @@ def reset_model():
     pass
 
 
-def save(model=None, session=None, save_pars={}):
+def save(model=None, session=None, save_pars=None):
     from mlmodels.util import save_pkl
     print(save_pars)
-    save_pkl(model, session, save_pars['path'])
+    save_pkl(model, session, save_pars)
 
 
-def load(load_pars={}):
+def load(load_pars=None):
     from mlmodels.util import load_pkl
     print(load_pars)
-    model0 = load_pkl(load_pars['path'])
+    model0 = load_pkl(load_pars)
 
     model = Model()
     model.model = model0
@@ -262,13 +262,13 @@ def get_params(param_pars={}, **kw):
     if choice == "test01":
         log("#### Path params   ##########################################")
         data_path  = path_norm( "dataset/tabular/titanic_train_preprocessed.csv"  )   
-        out_path   = path_norm( "/ztest/model_sklearn/lightgbm`/" )   
-        model_path = os.path.join(out_path , "model")
+        out_path   = path_norm( "ztest/model_sklearn/model_lightgbm/" )
+        model_path = os.path.join(out_path , "model.pkl")
 
         data_pars = {'mode': 'test', 'path': data_path, 'data_type' : 'pandas' }
         model_pars = {"objective":  "regression", "max_depth" : 4 , "random_state":0}
         compute_pars = {}
-        out_pars = {'path' : out_path}
+        out_pars = {'path' : out_path, "model_path": model_path}
 
         return model_pars, data_pars, compute_pars, out_pars
 
@@ -305,8 +305,9 @@ def test(data_path="dataset/", pars_choice="json", config_mode="test"):
     log("#### Plot   ########################################################")
 
     log("#### Save/Load   ###################################################")
-    save(model, session, out_pars)
-    model2, session = load(out_pars)
+    save_pars = {"path" : out_pars['model_path'] }
+    save(model, session, save_pars)
+    model2, session = load( save_pars)
     #     ypred = predict(model2, data_pars, compute_pars, out_pars)
     #     metrics_val = metrics(model2, ypred, data_pars, compute_pars, out_pars)
     print(model2.model)

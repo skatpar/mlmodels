@@ -22,7 +22,7 @@ import os
 import json
 import shutil
 from pathlib import Path
-
+from time import sleep
 
 
 from mlmodels.util import os_package_root_path, log, path_norm, get_model_uri
@@ -130,14 +130,21 @@ def clean_str(string):
 
 def create_tabular_dataset(path_train, path_valid, 
                            lang='en', pretrained_emb='glove.6B.300d'):
-    # needs a language model installed, 
-    # like with English language:
-    #  python -m spacy download en
-    spacy_en = spacy.load(lang, disable=[
+
+    disable = [
         'tagger', 'parser', 'ner', 'textcat'
         'entity_ruler', 'sentencizer', 
         'merge_noun_chunks', 'merge_entities',
-        'merge_subtokens'])
+        'merge_subtokens']
+    try:
+        spacy_en = spacy.load( f'{lang}_core_web_sm', disable= disable)
+
+    except Exception:
+        log( f"Download {lang}")
+        os.system( f"python -m spacy download {lang}")
+        sleep(60)
+        spacy_en = spacy.load( f'{lang}_core_web_sm', disable= disable)  
+
 
     def tokenizer(text):
         return [tok.text for tok in spacy_en.tokenizer(text)]
@@ -237,7 +244,7 @@ class TextCNN(nn.Module):
         return logit
 
 Model = TextCNN
-
+ 
 #############
 # functions #
 #############
@@ -253,9 +260,8 @@ def get_params(param_pars=None, **kw):
 
 
     if choice == "json":
-        data_path = path_norm(data_path) 
-        with open(data_path, 'rb') as f:
-            cf = json.load(f)
+        data_path = path_norm(data_path)
+        cf = json.load(open(data_path, 'rb'))
         cf = cf[config_mode]
         return cf['model_pars'], cf['data_pars'], cf['compute_pars'], cf['out_pars']
 
@@ -269,7 +275,7 @@ def get_params(param_pars=None, **kw):
         data_pars= {
 			"data_path": "dataset/recommender/IMDB_sample.txt",
             "split_if_exists": True,
-			"frac": 0.7,
+			"frac": 0.9,
             "lang": "en",
             "pretrained_emb": "glove.6B.300d",
             "batch_size": 64,
@@ -287,16 +293,16 @@ def get_params(param_pars=None, **kw):
 
         compute_pars= {
             "learning_rate": 0.001,
-            "epochs": 2,
+            "epochs": 1,
             "checkpointdir": out_path + "/checkpoint/"
         }
 
         out_pars= {
-            "train_path": "dataset/recommender/IMDB_train.csv",
-            "valid_path": "dataset/recommender/IMDB_valid.csv",
-            "checkpointdir": "/tmp"
+            "train_path":  path_norm("dataset/recommender/IMDB_train.csv"),
+            "valid_path": path_norm("dataset/recommender/IMDB_valid.csv"),
+            "checkpointdir": out_path + "/checkpoint/"
         }
-        
+
         return model_pars, data_pars, compute_pars, out_pars
 
 
@@ -338,6 +344,8 @@ def fit(model, sess=None, data_pars=None, compute_pars=None,
             best_test_acc = ts_acc
             #save paras(snapshot)
             print("model saves at {}% accuracy".format(best_test_acc))
+
+            os.makedirs(out_pars["checkpointdir"], exist_ok=True)
             torch.save(model.state_dict(),
                        os.path.join(out_pars["checkpointdir"],
                                     "best_accuracy"))

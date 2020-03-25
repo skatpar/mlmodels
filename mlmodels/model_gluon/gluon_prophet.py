@@ -16,8 +16,11 @@ import pandas as pd
 from gluonts.model.prophet import ProphetPredictor
 from gluonts.trainer import Trainer
 from mlmodels.model_gluon.util import (
-    _config_process, fit, get_dataset, load, log, metrics,
-    os_package_root_path, plot_predict, plot_prob_forecasts, predict, save)
+    _config_process, fit, get_dataset, load,  metrics,
+    plot_predict, plot_prob_forecasts, predict, save)
+
+
+from mlmodels.util import path_norm, os_package_root_path, log
 
 VERBOSE = False
 
@@ -46,14 +49,15 @@ def get_params(choice="", data_path="dataset/", config_mode="test", **kw):
 
 
     if choice == "test01":
-        from mlmodels.util import path_local_setup
+        from mlmodels.util import path_norm
         log("#### Path params   ################################################")
-        data_path, out_path, model_path = path_local_setup( __file__, sublevel=0,
-                                                           out_folder="ztest/gluon_phrophet/", 
-                                                           data_path=data_path)
+        data_path  = path_norm("dataset/timeseries/")
+        out_path   = path_norm("ztest/model_gluon/gluon_prophet/" )
+        model_path = os.path.join(out_path, "model")
+
         train_data_path = data_path + "GLUON-train.csv"
-        test_data_path = data_path + "GLUON-test.csv"
-        start = pd.Timestamp("01-01-1750", freq='1H')
+        test_data_path  = data_path + "GLUON-test.csv"
+        start           = pd.Timestamp("01-01-1750", freq='1H')
         data_pars = {"train_data_path": train_data_path, "test_data_path": test_data_path, 
                      "train": False,
                      "prediction_length": 48, "freq": '1H', "start": start, "num_series": 37,
@@ -83,7 +87,6 @@ def test(data_path="dataset/", choice=""):
 
 
     log("#### Model init, fit   ###########################################")
-###
     from mlmodels.models import module_load_full, fit, predict
     module, model = module_load_full("model_gluon.gluon_prophet", model_pars, data_pars, compute_pars)
     print(module, model)
@@ -91,7 +94,7 @@ def test(data_path="dataset/", choice=""):
     # model=m.model    ### WE WORK WITH THE CLASS (not the attribute GLUON )
     model = fit(module, model, data_pars=data_pars, compute_pars=compute_pars, out_pars=out_pars)
 
-###
+
     # model = Model(model_pars, compute_pars)
     # #model=m.model    ### WE WORK WITH THE CLASS (not the attribute GLUON )
     # # Requires sess as 2nd aprametetr

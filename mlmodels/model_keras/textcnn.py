@@ -27,7 +27,7 @@ from keras.datasets import imdb
 ####################################################################################################
 
 ######## Logs
-from mlmodels.util import os_package_root_path, log, path_norm
+from mlmodels.util import os_package_root_path, log, path_norm, get_model_uri
 
 
 
@@ -36,8 +36,7 @@ from mlmodels.model_keras.raw.textcnn_.text_cnn import TextCNN
 
 
 VERBOSE = False
-MODEL_URI = Path(os.path.abspath(__file__)).parent.name + "." + os.path.basename(__file__).replace(".py", "")
-
+MODEL_URI = get_model_uri(__file__)
 
 
 
@@ -126,10 +125,7 @@ def save(model=None, session=None, save_pars={}):
 def load(load_pars={}):
     from mlmodels.util import load_keras
     print(load_pars)
-    model0 =  load_keras(load_pars)
-
-    model = Model()
-    model.model = model0
+    model =  load_keras(load_pars)
     return model, None
 
 
@@ -186,18 +182,18 @@ def get_params(param_pars={}, **kw):
     if choice == "test01":
         log("#### Path params   ##########################################")
         data_path  = path_norm( "dataset/text/imdb.csv"  )   
-        out_path   = path_norm( "/ztest/model_keras/textcnn/" )   
+        out_path   = path_norm( "ztest/model_keras/textcnn/" )   
         model_path = os.path.join(out_path , "model")
 
 
-        data_pars    = {"path" : data_path, "train": 1, "maxlen":400, "max_features": 10, }
+        data_pars    = {"path" : data_path, "train": 1, "maxlen":40, "max_features": 5, }
 
-        model_pars   = {"maxlen":400, "max_features": 10, "embedding_dims":50,
+        model_pars   = {"maxlen":40, "max_features": 5, "embedding_dims":50,
 
                        }
                        
         compute_pars = {"engine": "adam", "loss": "binary_crossentropy", "metrics": ["accuracy"] ,
-                        "batch_size": 32, "epochs":1
+                        "batch_size": 1000, "epochs":1
                        }
 
         out_pars     = {"path": out_path,  "model_path": model_path}

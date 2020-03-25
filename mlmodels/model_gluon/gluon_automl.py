@@ -14,7 +14,11 @@ from pathlib import Path
 import autogluon as ag
 from autogluon import TabularPrediction as tabular_task
 from mlmodels.model_gluon.util_autogluon import (
-    fit, get_dataset, load, log, os_package_root_path, predict, save)
+    fit, get_dataset, load, predict, save)
+
+
+from mlmodels.util import path_norm, os_package_root_path, log
+
 
 
 ########################################################################################################################

@@ -1,9 +1,13 @@
-from __future__ import print_function
 
 import os
 import sys
 
 
+from mlmodels.util import os_package_root_path
+
+
+
+####################################################################################
 def import_data_tch(name="", mode="train", node_id=0, data_folder_root=""):
     import torch.utils.data.distributed
     from torchvision import datasets, transforms
@@ -83,20 +87,28 @@ def import_data_dask(**kw):
 
 
 
+def import_data():
+  def sent_generator(TRAIN_DATA_FILE, chunksize):
+      import pandas as pd
+      reader = pd.read_csv(TRAIN_DATA_FILE, chunksize=chunksize, iterator=True)
+      for df in reader:
+          val3  = df.iloc[:, 3:4].values.tolist()
+          val4  = df.iloc[:, 4:5].values.tolist()
+          flat3 = [item for sublist in val3 for item in sublist]
+          flat4 = [str(item) for sublist in val4 for item in sublist]
+          texts = []
+          texts.extend(flat3[:])
+          texts.extend(flat4[:])
 
+          sequences  = model.tokenizer.texts_to_sequences(texts)
+          data_train = pad_sequences(sequences, maxlen=data_pars["MAX_SEQUENCE_LENGTH"])
+          yield [data_train, data_train]
 
+  model.model.fit(sent_generator(data_pars["train_data_path"], batch_size / 2),
+                  epochs          = epochs,
+                  steps_per_epoch = n_steps,
+                  validation_data = (data_pars["data_1_val"], data_pars["data_1_val"]))
 
-def os_package_root_path(filepath, sublevel=0, path_add=""):
-    """
-       get the module package root folder
-    """
-    from pathlib import Path
-    path = Path(os.path.realpath(filepath)).parent
-    for i in range(1, sublevel + 1):
-        path = path.parent
-
-    path = os.path.join(path.absolute(), path_add)
-    return path
 
 
 

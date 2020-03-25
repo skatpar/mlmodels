@@ -30,7 +30,7 @@ MODEL_URI =  Path(os.path.abspath(__file__)).parent.name + "." + os.path.basenam
 
 ####################################################################################################
 ######## Logs, root path
-from mlmodels.util import os_package_root_path, log
+from mlmodels.util import os_package_root_path, log, path_norm
 
 
 import sklearn
@@ -116,13 +116,13 @@ def reset_model():
 def save(model=None, session=None, save_pars={}):
     from mlmodels.util import save_pkl
     print(save_pars)
-    save_pkl(model, session, save_pars['path'])
+    save_pkl(model, session, save_pars)
 
 
 def load(load_pars={}):
     from mlmodels.util import load_pkl
     print(load_pars)
-    model0 = load_pkl(load_pars['path'])
+    model0 = load_pkl(load_pars)
 
     model = Model()
     model.model = model0
@@ -167,17 +167,6 @@ def get_dataset(data_pars=None, **kw):
         return None, None, Xtest, ytest
 
 
-def path_setup(out_folder="ztest", sublevel=0, data_path="dataset/"):
-    data_path = os_package_root_path(__file__, sublevel=sublevel, path_add=data_path)
-    out_path = os.getcwd() + "/" + out_folder
-    os.makedirs(out_path, exist_ok=True)
-
-    model_path = out_path + "/model/"
-    os.makedirs(model_path, exist_ok=True)
-
-    log(data_path, out_path, model_path)
-    return data_path, out_path, model_path
-
 
 def get_params(param_pars={}, **kw):
     import json
@@ -193,12 +182,15 @@ def get_params(param_pars={}, **kw):
 
     if choice == "test01":
         log("#### Path params   ##########################################")
-        data_path, out_path, model_path = path_setup(out_folder="/ztest/", sublevel=0,
-                                                     data_path="dataset/")
+        data_path  = path_norm( "dataset/tabular/titanic_train_preprocessed.csv"  )
+        out_path   = path_norm( "ztest/model_sklearn/model_sklearn/" )
+        model_path = os.path.join(out_path , "model.pkl")
+
+
         data_pars = {'mode': 'test', 'path': data_path, 'data_type' : 'pandas' }
         model_pars = {"model_name":  "RandomForestClassifier", "max_depth" : 4 , "random_state":0}
         compute_pars = {}
-        out_pars = {'path' : out_path}
+        out_pars = {'path' : out_path, 'model_path' : model_path}
 
         return model_pars, data_pars, compute_pars, out_pars
 
@@ -235,8 +227,9 @@ def test(data_path="dataset/", pars_choice="json", config_mode="test"):
     log("#### Plot   ########################################################")
 
     log("#### Save/Load   ###################################################")
-    save(model, session, out_pars)
-    model2, session = load(out_pars)
+    save_pars = {"path" : out_pars['model_path'] }
+    save(model, session, save_pars)
+    model2, session = load( save_pars)
     #     ypred = predict(model2, data_pars, compute_pars, out_pars)
     #     metrics_val = metrics(model2, ypred, data_pars, compute_pars, out_pars)
     print(model2.model)

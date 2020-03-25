@@ -297,7 +297,7 @@ def get_params(param_pars, **kw):
         }
 
         out_pars = {
-            "model_save_path": "/ztest/model_tch/sentence_transformers/model/"
+            "model_save_path": model_path
         }
 
     return model_pars, data_pars, compute_pars, out_pars
