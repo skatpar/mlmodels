@@ -130,6 +130,9 @@ def clean_str(string):
 
 def create_tabular_dataset(path_train, path_valid, 
                            lang='en', pretrained_emb='glove.6B.300d'):
+    # needs a language model installed, 
+    # like with English language:
+    #  python -m spacy download en
     spacy_en = spacy.load(lang, disable=[
         'tagger', 'parser', 'ner', 'textcat'
         'entity_ruler', 'sentencizer', 
