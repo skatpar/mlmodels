@@ -50,9 +50,8 @@ jobs:
 
 
     ########  Test running 
-    ##### Please change BELOW to your model name  
-    - name: black
-      run: black -l 120  --py36 --check --fast  .
+    #- name: black
+    #  run: black -l 120  --py36 --check --fast  .
 
     - name: ml_optim
       run: ml_optim
@@ -60,6 +59,7 @@ jobs:
     - name: ml_models
       run: ml_models
 
+    ##### Please change BELOW to your model name  
     - name: ml_test
       run: ml_test  --do model_tf/1_lstm.py
       
