@@ -387,7 +387,7 @@ def config_init(to_path="."):
       config_init("model_tf.1_lstm", to_folder="ztest/")
     """
     import shutil
-    os_root = os_package_root_path(__file__)
+    os_root = os_package_root_path()
 
     to_path = os_root + "/ztest/current/"  if to_path == "."  else to_path
     log("Working Folder", to_path)
@@ -407,12 +407,13 @@ def config_init(to_path="."):
     #print("config file", path_config)
 
     os.makedirs(path_user + "/.mlmodels/" , exist_ok=True)
-    ddict = { "model_trained" : to_path + "/model_trained/"  }
+    ddict = { "model_trained" : to_path + "/model_trained/",   
+              "dataset"       : to_path + "/dataset/",     }
     log("Config values", ddict)
     json.dump( ddict, open(path_config, mode="w") )
 
 
-    from mlmodels.util import get_pretrained_path
+    from mlmodels.util import config_path_pretrained, config_path_dataset
     log("Config path",  get_pretrained_path() )
 
 

@@ -288,6 +288,8 @@ def get_params(param_pars={}, **kw):
 
         out_pars = {"path": out_path, "model_path": model_path}
 
+        log(data_pars, out_pars)
+
         return model_pars, data_pars, compute_pars, out_pars
 
     else:

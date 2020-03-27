@@ -14,6 +14,7 @@ Check parameters template in models_config.json
 import inspect
 import os
 import sys
+import json
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -21,18 +22,19 @@ import numpy as np
 import pandas as pd
 
 
+
+from mlmodels.util import (os_package_root_path, log, path_norm, get_model_uri,
+                           config_path_pretrained, config_path_dataset, os_path_split  )
+
+
+
+from mlmodels.data import (download_data, import_data  )
+
+
+
 VERBOSE = False
-MODEL_URI = MODEL_URI = os.path.dirname(os.path.abspath(__file__)).split("\\")[-1] + "." + os.path.basename(__file__).replace(".py",  "")
-
-
-
+MODEL_URI = get_model_uri(__file___)
 ####################################################################################################
-######## Logs, root path
-from mlmodels.util import os_package_root_path, log, path_norm
-"""
-def os_package_root_path(filepath, sublevel=0, path_add=""):
-
-"""
 
 
 
@@ -45,6 +47,8 @@ class Model:
 
     else :
         self.model = None
+
+
 
 
 
@@ -102,16 +106,14 @@ def reset_model():
 def save(model=None, session=None, save_pars={}):
     from mlmodels.util import save_tf
     print(save_pars)
-    save_tf(model, session, save_pars['path'])
+    save_tf(model, session, save_pars)
      
 
 
 def load(load_pars={}):
     from mlmodels.util import load_tf
     print(load_pars)
-    input_tensors, output_tensors =  load_tf(load_pars['path'], 
-                                            filename=load_pars['model_uri'])
-
+    input_tensors, output_tensors =  load_tf(load_pars)
 
     model = Model()
     model.model = None
@@ -141,7 +143,6 @@ def get_dataset(data_pars=None, **kw):
 
 
 def get_params(param_pars={}, **kw):
-    import json
     pp          = param_pars
     choice      = pp['choice']
     config_mode = pp['config_mode']
@@ -158,7 +159,7 @@ def get_params(param_pars={}, **kw):
     if choice == "test01":
         log("#### Path params   ##########################################")
         data_path  = path_norm( "dataset/text/imdb.csv"  )   
-        out_path   = path_norm( "/ztest/model_keras/crf_bilstm/" )   
+        out_path   = path_norm( "ztest/model_keras/crf_bilstm/" )   
         model_path = os.path.join(out_path , "model")
 
 
@@ -180,7 +181,11 @@ def get_params(param_pars={}, **kw):
           }
 
         model_pars   = {}
+
+        
         compute_pars = {}
+        
+
         out_pars     = {}
 
         return model_pars, data_pars, compute_pars, out_pars
@@ -259,7 +264,7 @@ if __name__ == '__main__':
     ####    test_api(model_uri="model_xxxx/yyyy.py", param_pars=None)
     from mlmodels.models import test_api
 
-    param_pars = {'choice': "test01", 'config_mode': 'test', 'data_path': '/dataset/'}
+    param_pars = {'choice': "test01", 'config_mode': 'test', 'data_path': 'dataset/'}
     test_api(module_uri=MODEL_URI, param_pars=param_pars)
 
 

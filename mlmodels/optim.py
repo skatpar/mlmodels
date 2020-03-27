@@ -55,12 +55,12 @@ def optim(model_uri="model_tf.1_lstm.py",
     ----------
     Returns : None
     """
-    if compute_pars["engine"] == "optuna" :
+    if hypermodel_pars["engine_pars"]['engine'] == "optuna" :
         return optim_optuna(model_uri,  hypermodel_pars, 
                             model_pars, data_pars, compute_pars,
                             out_pars)
 
-    if compute_pars["engine"] == "skopt" :
+    if hypermodel_pars["engine_pars"]['engine'] == "skopt" :
         return optim_skopt(model_uri,  hypermodel_pars, 
                             model_pars, data_pars, compute_pars,
                             out_pars)
@@ -71,10 +71,10 @@ def optim(model_uri="model_tf.1_lstm.py",
 
 
 def optim_optuna(model_uri="model_tf.1_lstm.py",
-                 hypermodel_pars = {},
+                 hypermodel_pars = {"engine" :{} },
                  model_pars      = {},
                  data_pars       = {},
-                 compute_pars    = {"method" : "normal/prune", 'ntrials': 2, "metric_target": "loss" },
+                 compute_pars    = {},    #only Model pars
                  out_pars        = {} ) :
     """
     ### Distributed
@@ -106,13 +106,15 @@ def optim_optuna(model_uri="model_tf.1_lstm.py",
     """
     import optuna
 
+    engine_pars = hypermodel_pars['engine_pars']
+
     save_path     = out_pars['save_path']
     log_path      = out_pars['log_path']
-    ntrials       = compute_pars['ntrials']
-    metric_target = compute_pars["metric_target"]
+    ntrials       = engine_pars['ntrials']
+    metric_target = engine_pars["metric_target"]
     #model_type    = model_pars['model_type']
     model_name = model_pars.get("model_name")   #### Only for sklearn model
-    log(model_pars, data_pars, compute_pars)
+    log(model_pars, data_pars, compute_pars, hypermodel_pars)
 
     module = module_load(model_uri)
     log(module)
@@ -120,6 +122,8 @@ def optim_optuna(model_uri="model_tf.1_lstm.py",
     def objective(trial):
         log("check", module, data_pars)
         for t,p  in hypermodel_pars.items():
+
+            if t == 'engine_pars' : continue  ##Skip 
             # type, init, range[0,1]
             x = p['type']
             if   x=='log_uniform':       pres = trial.suggest_loguniform(t,p['range'][0], p['range'][1])
@@ -149,14 +153,14 @@ def optim_optuna(model_uri="model_tf.1_lstm.py",
 
 
     log("###### Hyper-optimization through study   ##################################")
-    pruner = optuna.pruners.MedianPruner() if compute_pars["method"] =='prune' else None
+    pruner = optuna.pruners.MedianPruner() if engine_pars["method"] =='prune' else None
           
-    if compute_pars.get("distributed") is not None :
+    if engine_pars.get("distributed") is not None :
           # study = optuna.load_study(study_name='distributed-example', storage='sqlite:///example.db')
           try :
-             study = optuna.load_study(study_name= compute_pars['study_name'] , storage=compute_pars['storage'] )
+             study = optuna.load_study(study_name= engine_pars['study_name'] , storage=engine_pars['storage'] )
           except:
-             study = optuna.create_study(study_name= compute_pars['study_name'], storage=compute_pars['storage'], 
+             study = optuna.create_study(study_name= engine_pars['study_name'], storage=engine_pars['storage'], 
                                          pruner=pruner )
     else :           
          study = optuna.create_study(pruner=pruner)
@@ -192,105 +196,6 @@ def optim_optuna(model_uri="model_tf.1_lstm.py",
 
     ## model_pars_update["model_name"] = model_name    
     return model_pars_update
-
-
-
-
-
-
-
-
-def optim_skopt(model_uri="model_tf.1_lstm.py",
-                 hypermodel_pars = {},
-                 model_pars      = {},
-                 data_pars       = {},
-                 compute_pars    = {"method" : "normal/prune", 'ntrials': 2, "metric_target": "loss" },
-                 out_pars        = {} ) :
-    """
-
-
-    
-    """
-    import skopt, optuna
-    save_path     = out_pars['save_path']
-    log_path      = out_pars['log_path']
-    ntrials       = compute_pars['ntrials']
-    metric_target = compute_pars["metric_target"]
-    #model_type    = model_pars['model_type']
-    model_name = model_pars.get("model_name")   #### Only for sklearn model
-    log(model_pars, data_pars, compute_pars)
-    module = module_load(model_uri)
-    log(module)
-
-
-    def objective(trial):
-        log("check", module, data_pars)
-        for t,p  in hypermodel_pars.items():
-            # type, init, range[0,1]
-            x = p['type']
-
-
-            if   x=='log_uniform':       pres = trial.suggest_loguniform(t,p['range'][0], p['range'][1])
-            elif x=='int':               pres = trial.suggest_int(t,p['range'][0], p['range'][1])
-            elif x=='categorical':       pres = trial.suggest_categorical(t,p['value'])
-            elif x=='discrete_uniform':  pres = trial.suggest_discrete_uniform(t, p['init'],p['range'][0],p['range'][1])
-            elif x=='uniform':           pres = trial.suggest_uniform(t,p['range'][0], p['range'][1])
-            
-
-            else:
-                raise Exception( f'Not supported type {x}')
-                pres = None
-
-            model_pars[t] = pres
-
-        model = model_create(module, model_pars, data_pars, compute_pars)   # module.Model(**param_dict)
-        if VERBOSE : log(model)
-
-        model, sess    = module.fit(model, data_pars=data_pars, compute_pars= compute_pars, out_pars=out_pars)
-        metrics        = module.fit_metrics(model, data_pars=data_pars, compute_pars= compute_pars, out_pars=out_pars)
-
-        del sess, model
-        try :
-           module.reset_model()  # Reset Graph for TF
-        except Exception as e :
-           log(e)
-
-        return metrics[ metric_target ]
-
-
-    log("###### Hyper-optimization through study   ##################################")
-    pruner = optuna.pruners.MedianPruner() if compute_pars["method"] =='prune' else None
-          
-    if compute_pars.get("distributed") is not None :
-          # study = optuna.load_study(study_name='distributed-example', storage='sqlite:///example.db')
-          try :
-             study = optuna.load_study(study_name= compute_pars['study_name'] , storage=compute_pars['storage'] )
-          except:
-             study = optuna.create_study(study_name= compute_pars['study_name'], storage=compute_pars['storage'], 
-                                         pruner=pruner )
-    else :           
-         study = optuna.create_study(pruner=pruner)
-
-
-    study.optimize(objective, n_trials=ntrials)  # Invoke optimization of the objective function.
-    log("Optim, finished", n=35)
-    param_dict_best =  study.best_params
-    # param_dict.update(module.config_get_pars(choice="test", )
-
-
-    log("### Save Stats   ##########################################################")
-    study_trials = study.trials_dataframe()
-    study_trials.to_csv(f"{save_path}/{model_uri}_study.csv")
-
-    param_dict_best["best_value"] = study.best_value
-    # param_dict["file_path"] = file_path
-    json.dump( param_dict_best, open(f"{save_path}/{model_uri}_best-params.json", mode="w") )
-
-
-    log("### Post Proces   ##########################################################")
-    model_pars_update = post_process_best(model, model_uri, model_pars_update, data_pars, compute_pars, out_pars) 
-    return model_pars_update
-
 
 
 
@@ -352,6 +257,8 @@ def test_fast(ntrials=2):
     model_uri = 'model_tf.1_lstm'
 
     hypermodel_pars =  {
+        "engine_pars" : {"engine":"optuna", "method": "normal", 'ntrials': 2, "metric_target": "loss"},
+
         "learning_rate": {"type": "log_uniform", "init": 0.01,  "range" : [0.001, 0.1] },
         "num_layers":    {"type": "int", "init": 2,  "range" :[2, 4] },
         "size":    {"type": "int", "init": 6,  "range" :[6, 6] },
@@ -372,7 +279,7 @@ def test_fast(ntrials=2):
                     "size_layer": 128, "output_size": None, "timestep": 4, "epoch": 2, }
     
     data_pars    = {"data_path": data_path, "data_type": "pandas"}
-    compute_pars = {"engine":"optuna", "method": "normal", 'ntrials': 2, "metric_target": "loss" }
+    compute_pars = { }
     out_pars     = {"save_path": "ztest/optuna_1lstm/",   "log_path": "ztest/optuna_1lstm/"}
 
 

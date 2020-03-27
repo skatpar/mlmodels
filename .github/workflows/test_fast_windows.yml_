@@ -1,6 +1,5 @@
-name: test_fast_linux
+name: test_fast_windows
 
-###  https://github.com/arita37/awesome-actions#static-analysis
 
 on:
   push:
@@ -10,7 +9,8 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+
+    runs-on: windows-latest 
 
     steps:
     - uses: actions/checkout@v1
@@ -23,15 +23,16 @@ jobs:
     - name: Install pipenv
       uses: dschep/install-pipenv-action@v1
       
+
       
     #- uses: actions/cache@v1
     #  id: cache
     #  with:
     #    path: ~/.cache/pip
-    #    key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+    #    key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements_wi.txt') }}
     #    restore-keys: |
     #      ${{ runner.os }}-pip-
-   
+          
 
 
     - name: Cache pipenv virtualenv
@@ -39,30 +40,33 @@ jobs:
       uses: actions/cache@v1
       with:
         path: /opt/hostedtoolcache/Python/
-        key: ${{ runner.os }}-pipenv-${{ hashFiles('**/requirements.txt') }}
+        key: ${{ runner.os }}-pipenv-${{ hashFiles('**/requirements_wi.txt') }}
+
 
           
-
     - name: Install numpy
       if: steps.cache-pipenv.outputs.cache-hit != 'true'
-      run: pip install numpy
-      
+      run:  |
+        pip install  numpy<1.17.0
+        # pip install torch==0.4.1 -f https://download.pytorch.org/whl/torch_stable.html
+        pip install torch==1.0.1 -f https://download.pytorch.org/whl/torch_stable.html
+
+
 
     - name: Install repo requirements
       if: steps.cache-pipenv.outputs.cache-hit != 'true'
       run: |
-           pip install -r requirements.txt
+           pip install -r requirements_wi.txt
            pip install -r requirements_fake.txt
 
 
     - name: Install repo
-      run: pip install -e . -r requirements.txt  --no-deps
+      run: pip install -e .  -r requirements_wi.txt  --no-deps
 
 
     - name: Repo Check
-      run: |
-           python -c "import mlmodels,os ; print(mlmodels); print(os)"
-           ml_test --do test_import
+      run: python -c "import mlmodels,os ; print(mlmodels); print(os)"
+
 
 
     ########  Test running 
@@ -77,12 +81,4 @@ jobs:
     #- name: ml_test
     #  run: ml_test
       
-         
-
-
-
-# https://ianwhitestone.work/AWS-Serverless-Deployments-With-Github-Actions/
-#
-#
-#
-#
+      

@@ -186,7 +186,7 @@ ypred       = module.predict(model,  data_pars=data_pars, compute_pars=compute_p
 
 ---
 
-### Using json config file for input ([Example notebook](example/1_lstm_json.ipynb), [JSON file](mlmodels/dataset/json/1_lstm.json))
+### Using json config file for input ([Example notebook](example/1_lstm_json.ipynb), [JSON file](mlmodels/example/1_lstm.json))
 
 #### Import library and functions
 ```python
@@ -205,7 +205,7 @@ module        =  module_load( model_uri= model_uri )                           #
 model_pars, data_pars, compute_pars, out_pars = module.get_params(param_pars={
     'choice':'json',
     'config_mode':'test',
-    'data_path':'../mlmodels/dataset/json/1_lstm.json'
+    'data_path':'../mlmodels/example/1_lstm.json'
 })
 ```
 
@@ -222,7 +222,7 @@ ypred       = module.predict(model, sess=sess,  data_pars=data_pars, compute_par
 
 ---
 
-### Using Scikit-learn's SVM for Titanic Problem from json file ([Example notebook](example/sklearn_titanic_svm.ipynb), [JSON file](mlmodels/dataset/json/sklearn_titanic_svm.json))
+### Using Scikit-learn's SVM for Titanic Problem from json file ([Example notebook](example/sklearn_titanic_svm.ipynb), [JSON file](mlmodels/example/sklearn_titanic_svm.json))
 
 #### Import library and functions
 ```python
@@ -241,7 +241,7 @@ module        =  module_load( model_uri= model_uri )                           #
 model_pars, data_pars, compute_pars, out_pars = module.get_params(param_pars={
     'choice':'json',
     'config_mode':'test',
-    'data_path':'../mlmodels/dataset/json/sklearn_titanic_svm.json'
+    'data_path':'../mlmodels/example/sklearn_titanic_svm.json'
 })
 ```
 
@@ -270,7 +270,7 @@ roc_auc_score(y, ypred)
 
 ---
 
-### Using Scikit-learn's Random Forest for Titanic Problem from json file ([Example notebook](example/sklearn_titanic_randomForest.ipynb), [JSON file](mlmodels/dataset/json/sklearn_titanic_randomForest.json))
+### Using Scikit-learn's Random Forest for Titanic Problem from json file ([Example notebook](example/sklearn_titanic_randomForest.ipynb), [JSON file](mlmodels/example/sklearn_titanic_randomForest.json))
 
 #### Import library and functions
 ```python
@@ -289,7 +289,7 @@ module        =  module_load( model_uri= model_uri )                           #
 model_pars, data_pars, compute_pars, out_pars = module.get_params(param_pars={
     'choice':'json',
     'config_mode':'test',
-    'data_path':'../mlmodels/dataset/json/sklearn_titanic_randomForest.json'
+    'data_path':'../mlmodels/example/sklearn_titanic_randomForest.json'
 })
 ```
 
@@ -318,7 +318,7 @@ roc_auc_score(y, ypred)
 
 ---
 
-### Using Autogluon for Titanic Problem from json file ([Example notebook](example/gluon_automl_titanic.ipynb), [JSON file](mlmodels/dataset/json/gluon_automl.json))
+### Using Autogluon for Titanic Problem from json file ([Example notebook](example/gluon_automl_titanic.ipynb), [JSON file](mlmodels/example/gluon_automl.json))
 
 #### Import library and functions
 ```python
@@ -337,7 +337,7 @@ module        =  module_load( model_uri= model_uri )                           #
 model_pars, data_pars, compute_pars, out_pars = module.get_params(
     choice='json',
     config_mode= 'test',
-    data_path= '../mlmodels/dataset/json/gluon_automl.json'
+    data_path= '../mlmodels/example/gluon_automl.json'
 )
 ```
 
@@ -369,7 +369,7 @@ roc_auc_score(y, ypred)
 ---
 ---
 
-### Using hyper-params (optuna) for Titanic Problem from json file ([Example notebook](example/sklearn_titanic_randomForest_example2.ipynb), [JSON file](mlmodels/dataset/json/hyper_titanic_randomForest.json))
+### Using hyper-params (optuna) for Titanic Problem from json file ([Example notebook](example/sklearn_titanic_randomForest_example2.ipynb), [JSON file](mlmodels/example/hyper_titanic_randomForest.json))
 
 #### Import library and functions
 ```python
@@ -384,7 +384,7 @@ from mlmodels.optim import optim
 import json
 
 ###  hypermodel_pars, model_pars, ....
-data_path = '../mlmodels/dataset/json/hyper_titanic_randomForest.json'  
+data_path = '../mlmodels/example/hyper_titanic_randomForest.json'  
 pars = json.load(open( data_path , mode='r'))
 for key, pdict in  pars.items() :
   print(key)
@@ -430,135 +430,60 @@ roc_auc_score(y, ypred)
 
 ---
 
+### Using LightGBM for Titanic Problem from json file ([Example notebook](mlmodels/example/model_lightgbm.ipynb), [JSON file](mlmodels/example/lightgbm_titanic.json))
 
+#### Import library and functions
+```python
+# import library
+import mlmodels
+from mlmodels.models import module_load
+from mlmodels.util import path_norm_dict, path_norm
+import json
+```
 
+#### Load model and data definitions from json
+```python
+# Model defination
+model_uri    = "model_sklearn.model_lightgbm.py"
+module        =  module_load( model_uri= model_uri)
 
+# Path to JSON
+data_path = '../dataset/json/lightgbm_titanic.json'  
 
+# Model Parameters
+pars = json.load(open( data_path , mode='r'))
+for key, pdict in  pars.items() :
+  globals()[key] = path_norm_dict( pdict   )   ###Normalize path
 
-## CLI tools: package provide below tools 
-```bash
-- ml_models
-- ml_optim    
-- ml_test
-
-
+model_pars      = test['model_pars']
+data_pars       = test['data_pars']
+compute_pars    = test['compute_pars']
+out_pars        = test['out_pars']
 ```
 
 
-### How to use tools
-```bash
-ml_models --do  
-    model_list  :  list all models in the repo                            
-    testall     :  test all modules inside model_tf
-    test        :  test a certain module inside model_tf
-    fit         :  wrap fit generic m    ethod
-    predict     :  predict  using a pre-trained model and some data
-    generate_config  :  generate config file from code source
-    
-  ## --do fit  
-  --model_uri     model_tf.1_lstm
-  --save_folder   myfolder/
-  --config_file   myfile.json
-  --config_mode   "test"
-
-
-  ## --do predict  
-  --load_folder   mymodelsave_folder/
-
-
-
-ml_optim --do
-    test      :  Test the hyperparameter optimization for a specific model
-    test_all  :  TODO, Test all
-    search    :  search for the best hyperparameters of a specific model
-
-
-ml_test  --do
-    all            :  test all suites
-    model_sructure : only model structure
-
-
-
-
-### Command line tool sample
-
-#### generate config file
-    ml_models  --do generate_config  --model_uri model_tf.1_lstm.py  --save_folder "c:\myconfig"
-
-#### TensorFlow LSTM model
-    ml_models  --model_uri model_tf/1_lstm.py  --do test
-
-#### PyTorch models
-    ml_models  --model_uri model_tch/mlp.py  --do test
-    
-    
-#### Custom  Models
-    ml_models --do test  --model_uri "D:\_devs\Python01\gitdev\mlmodels\mlmodels\model_tf_lstm.py"
-
-
-
-#### Model param search test
-    ml_optim --do test
-
-
-#### For normal optimization search method
-    ml_optim --do search --ntrials 1  --config_file optim_config.json --optim_method normal
-    ml_optim --do search --ntrials 1  --config_file optim_config.json --optim_method prune  ###### for pruning method
-
-    ml_optim --modelname model_tf.1_lstm.py  --do test
-    ml_optim --modelname model_tf.1_lstm.py  --do search
-
-
+#### Load Parameters and Train
+```python
+model = module.Model(model_pars, data_pars, compute_pars) # create model instance
+model, session = module.fit(model, data_pars, compute_pars, out_pars) # fit model
 ```
 
 
-#### Distributed training on Pytorch Horovod
-```
-#### Distributed Pytorch on CPU (using Horovod and MPI on Linux, 4 processes)  in model_tch/mlp.py
-    mlmodels/distri_torch_mpirun.sh   4    model_tch.mlp    mymodel.json
-
-
+#### Check inference
+```python
+ypred       = module.predict(model,  data_pars=data_pars, compute_pars=compute_pars, out_pars=out_pars)     # get predictions
+ypred
 ```
 
-
-#### Model list 
-
+#### Check metrics
+```python
+metrics_val = module.fit_metrics(model, data_pars, compute_pars, out_pars)
+metrics_val 
 ```
---model_uri
+
+---
 
 
 
-mlmodels.model_gluon.gluon_automl.py
-mlmodels.model_gluon.gluon_deepar.py
-mlmodels.model_gluon.gluon_ffn.py
-mlmodels.model_gluon.gluon_prophet.py
 
-
-mlmodels.model_keras.01_deepctr.py
-mlmodels.model_keras.02_cnn.py
-
-
-mlmodels.model_rank.LambdaRank.py
-mlmodels.model_rank.load_mslr.py
-mlmodels.model_rank.metrics.py
-mlmodels.model_rank.RankNet.py
-
-
-mlmodels.model_sklearn.model.py
-
-
-mlmodels.model_tch.cnn_classifier.py
-mlmodels.model_tch.data_prep.py
-mlmodels.model_tch.mlp.py
-mlmodels.model_tch.nbeats.py
-mlmodels.model_tch.pplm.py
-mlmodels.model_tch.textcnn.py
-mlmodels.model_tch.transformer_classifier.py
-mlmodels.model_tch.transformer_sentence.py
-
-
-mlmodels.model_tf.1_lstm.py
-
-
-```
 

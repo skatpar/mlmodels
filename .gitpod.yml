@@ -1,3 +1,6 @@
+ #image:
+ #file: .gitpod.Dockerfile
+ 
 ports:
 - port: 8080
   onOpen: open-preview
@@ -20,7 +23,7 @@ github:
     default: true
     
     # enable for all branches in this repo (defaults to false)
-    branches: true
+    # branches: true
     
     # enable for pull requests coming from this repo (defaults to true)
     pullRequests: true

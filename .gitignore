@@ -131,3 +131,4 @@ venv.bak/
 example/dask*
 example/dataset
 example/exp
+/functions.json

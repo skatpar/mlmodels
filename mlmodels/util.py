@@ -4,6 +4,14 @@ import re
 
 # import toml
 from pathlib import Path
+import json
+
+
+"""
+from mlmodels.util import (os_package_root_path, log, path_norm
+    config_load_root, config_path_pretrained, config_path_dataset, config_set
+    )
+"""
 
 
 ####################################################################################################
@@ -22,15 +30,6 @@ def log(*s, n=0, m=1):
 
 
 ####################################################################################################
-"""
-def os_package_root_path(add_path="",n=0):
-  from pathlib import Path
-  add_path = os.path.join(Path(__file__).parent.absolute(), add_path)
-  # print("os_package_root_path,check", add_path)
-  return add_path
-"""
-
-
 def os_folder_copy(src, dst):
     """Copy a directory structure overwriting existing files"""
     import shutil
@@ -72,9 +71,6 @@ def os_get_file(folder=None, block_list=[], pattern=r'*.py'):
             list_select.append(t)
 
     return list_select
-
-
-
 
 
 def model_get_list(folder=None, block_list=[]):
@@ -135,20 +131,6 @@ def get_recursive_files(folderPath, ext='/*model*/*.py'):
     return files
 
 
-"""
-def path_local_setup(current_file=None, out_folder="", sublevel=0, data_path="dataset/"):
-    root = os_package_root_path(__file__, sublevel=0, path_add="")
-
-    out_path = path_norm(out_folder)
-    data_path = path_norm(data_path)
-
-    model_path = f"{out_path}/model/"
-    os.makedirs(out_path, exist_ok=True)
-    os.makedirs(model_path, exist_ok=True)
-
-    log(data_path, out_path, model_path)
-    return data_path, out_path, model_path
-"""
 
 
 def path_norm(path=""):
@@ -166,24 +148,13 @@ def path_norm(path=""):
             return path
     return path
 
-    """
 
-    elif path.startswith("model_") or path.startswith("//model_"):
-        path = os.path.join(root, path)
+def path_norm_dict(ddict):
+    for k,v in ddict.items():
+        if "path" in k :
+            ddict[k] = path_norm(v)
+    return ddict
 
-
-    elif path.startswith("dataset") or path.startswith("//dataset"):
-        path = os.path.join(root, path)
-
-
-    elif path.startswith("template") or path.startswith("//template"):
-        path = os.path.join(root, path)
-
-
-    elif path.startswith("ztest") or path.startswith("//ztest"):
-        path = os.path.join(root, path)
-    return path
-    """
 
 """
 def os_module_path():
@@ -245,7 +216,7 @@ def test_module(model_uri="model_tf/1_lstm.py", data_path="dataset/", pars_choic
 
 
 ####################################################################################################
-def load_root_config():
+def config_load_root():
     import json
     path_user = os.path.expanduser('~')
     path_config = path_user + "/.mlmodels/config.json"
@@ -254,9 +225,24 @@ def load_root_config():
     return ddict
 
 
-def get_pretrained_path():
-    ddict = load_root_config()
+def config_path_pretrained():
+    ddict = config_load_root()
     return ddict['model_trained']
+
+
+def config_path_dataset():
+    ddict = config_load_root()
+    return ddict['dataset']
+
+
+def config_set(ddict2):
+    ddict = config_load_root()
+
+    for k,x in ddict2.items():
+      ddict[k] = x
+
+    json.dump(ddict, open(ddict, mode='w'))
+   
 
 
 def params_json_load(path, config_mode="test"):
@@ -274,6 +260,7 @@ def params_json_load(path, config_mode="test"):
             log("error in json, cannot load ", t)
 
     return tuple(list_pars)
+
 
 
 def load_config(args, config_file, config_mode, verbose=0):
@@ -388,7 +375,6 @@ def tf_deprecation():
 
 ####################################################################################################
 ###########  Utils #################################################################################
-
 class Model_empty(object):
     def __init__(self, model_pars=None, data_pars=None, compute_pars=None
                  ):
@@ -407,16 +393,16 @@ def load(load_pars):
     if "model_keras" in p['model_uri']:
         path = os.path.abspath(p['path'] + "/../")
         name = os.path.basename(p['path']) if ".h5" in p['path'] else "model.h5"
-        return load_keras(path, name)
+        return load_keras(load_pars)
 
 
 def save(model=None, session=None, save_pars=None):
     p = save_pars
+    if  "model_keras" in p['model_uri'] :
+       path = os.path.abspath( p['path'] + "/../")
+       name = os.path.basename(p['path']) if ".h5" in p['path'] else "model.h5"
+       save_keras( model, session, save_pars)
 
-    if "model_keras" in p['model_uri']:
-        path = os.path.abspath(p['path'] + "/../")
-        name = os.path.basename(p['path']) if ".h5" in p['path'] else "model.h5"
-        save_keras(model, session, os.path.join(path, name))
 
 
 
@@ -535,219 +521,46 @@ def save_keras(model=None, session=None, save_pars=None, ):
 
 
 
-
-def load_gluon( load_pars):
-    return 1
-
-def save_gluon(model=None, session=None, save_pars=None):
-    return 1
+def save_gluonts(model=None, session=None, save_pars=None):
+    path = save_pars['path']
+    os.makedirs(path, exist_ok=True)
+    model.model.serialize(Path(path))
 
 
 
+def load_gluonts(load_pars=None):
+    from gluonts.model.predictor import Predictor
+    predictor_deserialized = Predictor.deserialize(Path( load_pars['path'] ))
+
+    model = Model_empty()
+    model.model = predictor_deserialized
+    return model
 
 
-####################################################################################################
-########## Other model specific ####################################################################
+
+
+
+
 
 
 """
+def path_local_setup(current_file=None, out_folder="", sublevel=0, data_path="dataset/"):
+    root = os_package_root_path(__file__, sublevel=0, path_add="")
 
+    out_path = path_norm(out_folder)
+    data_path = path_norm(data_path)
 
-import glob
+    model_path = f"{out_path}/model/"
+    os.makedirs(out_path, exist_ok=True)
+    os.makedirs(model_path, exist_ok=True)
 
-path = "."
-files = glob.glob(path + '/*model*/*.py', recursive=True)
-files
-
-
-
-
-from datetime import datetime, timedelt
-
-
-a
-
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import seaborn as sns
-from sklearn.preprocessing import MinMaxScaler
-
-import tensorflow as tf
-
-sns.set()
-
-
-class ModelFactory():
-    def model_create(self, model_name, datasampler, hyper_parameters={'epoch':5}):
-        if model_name == 'lstm':
-            datasampler = DataSampler() # the reader object for the input data
-            model =  LSTM(datasampler)
-            model.set_pars(hyper_parameters)
-            return model
-
-# example usage
-# data = DataSampler(file_name='x.csv', timestamp=5)
-# this datasampler is sent to the model
-class DataSampler():
-    def __init__(self, file_name = '../dataset/GOOG-year.csv', timestamp =5):
-        self.data_pars = pd.read_csv()
-        self.date_ori = pd.to_datetime(data_pars.iloc[:, 0]).tolist()
-        self.minmax = MinMaxScaler()
-        self.timestamp = timestamp
-        self.df_log = self.preprocess_df()
-    
-    def preprocess_df(self):
-        self.minmax.fit(self.data_pars.iloc[:, 1:].astype('float32'))
-        df_log = minmax.transform(data_pars.iloc[:, 1:].astype('float32'))
-        df_log = pd.DataFrame(df_log)
-        return df_log
-
-    def batch_sampler(self, start, end):
-        # sampler for training set
-        for k in range(0, start, end):
-            index   = min(k + timestamp, df_log.shape[0] -1)
-            batch_x = np.expand_dims( df_log.iloc[k : index, :].values, axis = 0)
-            batch_y = df_log.iloc[k + 1 : index + 1, :].values
-            yield (batch_x, batch_y)
-    
-    def train_batch_sampler(self):
-        return batch_sampler(self.df_log.shape[0] - 1, self.timestamp)
-    
-    def test_batch_sampler(self):
-        return batch_sampler((self.df_log.shape[0] // self.timestamp) * self.timestamp, self.timestamp)
-    
-    def get_n_samples_per_batch(self):
-        return self.df_log.shape[0] // self.timestamp
-        
-
-
-class BaseModelDl(object):
-    
-    #Base Model class used for models under Dl class 
-    #acting as parent class
-
-    def __init__(self):
-        self.datasampler = None
-        self.name = ''
-        self.epoch = 5
-        self.learning_rate = 0.01
-        self.sess = None
-
-    def get_pars(self):
-        # epoch and learning rate exists in all models
-        return {
-            'epoch': self.epoch,
-            'learning_rate': self.learning_rate
-        }
-
-    def set_pars(self, **parameters):
-        # this function is common for all children classes
-        for parameter, value in parameters.items():
-            if hasattr(self,parameter):
-               setattr(self, parameter, value)
-            else:
-                raise AttributeError('Class {} does not have parameter {}'.format(
-                 self.name, parameter  
-                ))
-        return self
-
-    def build_model(self):
-        # used to create placeholders and optimizer based on parameters set
-        # called after setting the parameters
-        pass
-
-    def fit(self):
-        pass
-
-
-    def predict(self,X):
-        pass
-
-    def load(self, model_path):
-        # model_path=parent_folder/model.ckpt
-        saver = tf.train.Saver()
-        saver.load(self.sess, model_path)
-
-    def save(self, model_path):
-        # model_path=parent_folder/model.ckpt
-        saver = tf.train.Saver()
-        saver.save(self.sess, model_path)
-
-
-class LSTM(BaseModelDl):
-    def __init__(self, datasampler):
-        super(LSTM, self).__init__()
-        self.datasampler = datasampler
-        self.name = 'lstm'
-        self.num_layers = 1
-        self.size_layer = 128
-        self.timestamp = 5
-        self.dropout_rate = 0.7
-        self.future_day = 50
-        self.learning_rate = 0.01
-        self.feat_size = 1
-        self.output_size = 1
-        self.forget_bias = 0.1
-        self.model = None
-
-
-    def get_pars(self):
-        return {
-            'num_layers': self.num_layers,
-            'size_layer': self.size_layer,
-            'dropout_rate': self.dropout_rate,
-            'epoch': self.epoch,
-            'learning_rate': 0.01 ,
-            'output_size': self.output_size,
-            'feat_size': self.feat_size,
-            'forget_bias': self.forget_bias
-        }
-
-
-    def build_model(self):
-        def lstm_cell(size_layer):
-            return tf.nn.rnn_cell.LSTMCell(size_layer, state_is_tuple = False)
-
-        rnn_cells = tf.nn.rnn_cell.MultiRNNCell(
-                    [lstm_cell(self.size_layer) for _ in range(self.num_layers)],
-                    state_is_tuple = False,)
-                    
-        self.X = tf.placeholder(tf.float32, (None, None, self.feat_size))
-        self.Y = tf.placeholder(tf.float32, (None, self.output_size))
-        drop   = tf.contrib.rnn.DropoutWrapper(rnn_cells, output_keep_prob = self.forget_bias)
-        self.hidden_layer = tf.placeholder( tf.float32, 
-                                            (None, num_layers * 2 * size_layer))
-        self.outputs, self.last_state = tf.nn.dynamic_rnn(
-            drop, self.X, initial_state = self.hidden_layer, dtype = tf.float32
-        )
-        self.logits    = tf.layers.dense(self.outputs[-1], output_size)
-        self.cost      = tf.reduce_mean(tf.square(self.Y - self.logits))
-        self.optimizer = tf.train.AdamOptimizer(learning_rate).minimize(self.cost)
-
-        self.sess    = tf.InteractiveSession()
-        self.sess.run(tf.global_variables_initializer())
-
-    
-    def fit(self):
-        for i in range(self.epoch):
-            init_value = np.zeros((1, self.num_layers * 2 * self.size_layer))
-            for batch_x, batch_y in self.datasampler.train_batch_sampler():
-                last_state, _, loss = sess.run(
-                    [self.last_state, self.optimizer, self.cost],
-                    feed_dict = {
-                        self.X: batch_x,
-                        self.Y: batch_y,
-                        self.hidden_layer: init_value,
-                    },
-                )
-                init_value = last_state
-                total_loss += loss
-            total_loss /= self.datasampler.get_n_samples_per_batch()
-            if (i + 1) % 100 == 0:
-                print('epoch:', i + 1, 'avg loss:', total_loss)
-
-    def predict(self,):
-        # takes a sampler as the one in datasampler class
-        # in this function it should take a sampler 
+    log(data_path, out_path, model_path)
+    return data_path, out_path, model_path
 """
+
+
+
+
+
+
+

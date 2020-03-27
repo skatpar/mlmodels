@@ -159,7 +159,9 @@ Requires at least one evaluation data. If True, the eval metric on the eval set 
 
     sess = None  # Session type for compute
     Xtrain, ytrain, Xtest,  ytest = get_dataset(data_pars)
-    model.model.fit(Xtrain, ytrain, **compute_pars)
+
+    compute_pars_light = compute_pars["lightgbm_pars"]
+    model.model.fit(Xtrain, ytrain, **compute_pars_lightgbm)
     return model, sess
 
 
@@ -267,7 +269,7 @@ def get_params(param_pars={}, **kw):
 
         data_pars = {'mode': 'test', 'path': data_path, 'data_type' : 'pandas' }
         model_pars = {"objective":  "regression", "max_depth" : 4 , "random_state":0}
-        compute_pars = {}
+        compute_pars = { "meta" : 1,  "lightgbm_pars":{}}
         out_pars = {'path' : out_path, "model_path": model_path}
 
         return model_pars, data_pars, compute_pars, out_pars
