@@ -136,14 +136,7 @@ def create_tabular_dataset(path_train, path_valid,
         'entity_ruler', 'sentencizer', 
         'merge_noun_chunks', 'merge_entities',
         'merge_subtokens']
-    try:
-        spacy_en = spacy.load( f'{lang}_core_web_sm', disable= disable)
-
-    except Exception:
-        log( f"Download {lang}")
-        os.system( f"python -m spacy download {lang}_core_web_sm")
-        sleep(60)
-        spacy_en = spacy.load( f'{lang}_core_web_sm', disable= disable)  
+    spacy_en = spacy.load( f'{lang}', disable= disable)
 
 
     def tokenizer(text):
