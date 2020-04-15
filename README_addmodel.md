@@ -14,34 +14,33 @@ https://github.com/arita37/mlmodels/issues/101
 # 
 # 
 ___________________________________________________________________________________________
-# Steps  for : Pull Request, a Fix or add a New Model :
+# Steps for: Pull Request, A Fix or Adding a New Model:
 
 
 ### Coding Style
-  Please use **Line = 110 characters**
-  "Pretty Code is better than strict PEP8, which is ugly to read..."
-  Please use BLACK Formatter.
+   - Please don't exceed 100 characters per line.
+   - "Pretty Code is better than strict PEP8, which is ugly to read...". [Read More](https://realpython.com/python-pep8/)
+   - Please use [Black](https://github.com/psf/black) formatter Python package.
 
 
 
 ### 0) Read the examples :
 
-  https://github.com/arita37/mlmodels/issues/102
-
-  https://github.com/arita37/mlmodels/pull/100
+  [Issue#102](https://github.com/arita37/mlmodels/issues/102)
+  [Issue#100](https://github.com/arita37/mlmodels/pull/100)
 
 
 
     
-### 1) Create a branch from DEV branch called : modelXXX
+### 1) Fork from arita37/mlmodels. Create a new branch from DEV branch (modelXXX, e.g., model_deepar) to work on.
     git checkout -b myfeat
 
 
-### 2) TEST : Change those files with your MODEL_NAME AND BRANCH NAME :
+### 2) TEST : Change in these files where needed with your MODEL_NAME and BRANCH NAME :
 
-  https://github.com/arita37/mlmodels/blob/dev/.github/workflows/test_specific_model.yml
+  [test_specific_model](https://github.com/arita37/mlmodels/blob/dev/.github/workflows/test_specific_model.yml)
 
-  https://github.com/arita37/mlmodels/blob/dev/pullrequest.json
+  [pullrequest.json] (https://github.com/arita37/mlmodels/blob/dev/pullrequest.json)
 
 
 ### 3) TEST : After each commit or PullRequest, automatic test is run on Github :
