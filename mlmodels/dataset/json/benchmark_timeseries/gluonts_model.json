@@ -20,22 +20,19 @@
              },
         "data_pars": {
             "train": true, 
-              "train_data_path": "dataset/timeseries/stock/qqq_us_train.csv",
-              "test_data_path": "dataset/timeseries/stock/qqq_us_test.csv",
+            "train_data_path": "dataset/timeseries/stock/qqq_us_train.csv",
+            "test_data_path": "dataset/timeseries/stock/qqq_us_test.csv",
             "prediction_length": 60, 
             "freq": "D",
             "start" : "",        
             "col_date"   : "Date",                
             "col_ytarget" : ["Close"],  "num_series" : 1,
-
-            "cols_cat": [],   "cols_num" : []
-                    
+            "cols_cat": [],   "cols_num" : []                    
             },
             
             
         "compute_pars": {
-            "num_samples": 100,
-                
+            "num_samples": 100,               
             "compute_pars" : {
                 "batch_size": 32, "clip_gradient": 100, "epochs": 1, "init": "xavier", "learning_rate": 1e-3, 
                 "learning_rate_decay_factor": 0.5, 
@@ -82,26 +79,21 @@
             "train_data_path": "dataset/timeseries/stock/qqq_us_train.csv",
             "test_data_path": "dataset/timeseries/stock/qqq_us_test.csv",
             "prediction_length": 60, 
-
             "freq": "D",
             "start" : "",        
             "col_date"   : "Date",                
             "col_ytarget" : ["Close"],  "num_series" : 1,
-
             "cols_cat": [],   "cols_num" : []
-                    
             },
             
             
         "compute_pars": {
             "num_samples": 100,
-                
             "compute_pars" : {
                 "batch_size": 32, "clip_gradient": 100, "epochs": 1, "init": "xavier", "learning_rate": 1e-3, 
                 "learning_rate_decay_factor": 0.5, 
                 "hybridize": false,
                 "num_batches_per_epoch": 10,
-
                 "minimum_learning_rate": 5e-05, "patience": 10, "weight_decay": 1e-08
             }
         },
@@ -122,7 +114,6 @@
                 "prediction_length": 60,
                 "embedding_dimension": 20,
                 "num_parallel_samples":  100,
-
                 "num_bins":  1024,
                 "hybridize_prediction_net":  false,
                 "n_residue": 24,
@@ -148,47 +139,37 @@
             "train_data_path": "dataset/timeseries/stock/qqq_us_train.csv",
             "test_data_path": "dataset/timeseries/stock/qqq_us_test.csv",
             "prediction_length": 60, 
-
             "freq": "D",
             "start" : "",        
             "col_date"   : "Date",                
             "col_ytarget" : ["Close"],  "num_series" : 1,
-
-            "cols_cat": [],   "cols_num" : []
-                    
+            "cols_cat": [],   "cols_num" : []                    
             },
             
             
         "compute_pars": {
-            "num_samples": 100,
-                
+            "num_samples": 100,                
             "compute_pars" : {
                 "batch_size": 32, "clip_gradient": 100, "epochs": 1, "init": "xavier", 
                 "learning_rate": 1e-3,  "learning_rate_decay_factor": 0.5, 
                 "hybridize": false,
                 "num_batches_per_epoch": 10,
-
                 "minimum_learning_rate": 5e-05, "patience": 10, "weight_decay": 1e-08
             }
-        },
-        
-        
+        },        
       "out_pars": {
          "path": "ztest/model_gluon/gluonts_wavenet/",
          "plot_prob": true, "quantiles": [0.5]
     }
     },       
     
-    
-
      "transformer": {
          "model_pars": {
              "model_name" : "transformer",
              "model_pars" : {
                 "freq": "D",
                 "prediction_length": 60,
-                "embedding_dimension": 20,
-                            
+                "embedding_dimension": 20,                            
                 "dropout_rate": 0.1,
                 "model_dim":  32,
                 "inner_ff_dim_scale":  4,
@@ -217,26 +198,22 @@
             "train_data_path": "dataset/timeseries/stock/qqq_us_train.csv",
             "test_data_path": "dataset/timeseries/stock/qqq_us_test.csv",
             "prediction_length": 60, 
-
             "freq": "D",
             "start" : "",        
             "col_date"   : "Date",                
             "col_ytarget" : ["Close"],  "num_series" : 1,
-
             "cols_cat": [],   "cols_num" : []
                     
             },
             
             
         "compute_pars": {
-            "num_samples": 100,
-                
+            "num_samples": 100,                
             "compute_pars" : {
                 "batch_size": 32, "clip_gradient": 100, "epochs": 1, "init": "xavier", "learning_rate": 1e-3, 
                 "learning_rate_decay_factor": 0.5, 
                 "hybridize": false,
                 "num_batches_per_epoch": 10,
-
                 "minimum_learning_rate": 5e-05, "patience": 10, "weight_decay": 1e-08
             }
         },
