@@ -20,8 +20,7 @@
              },
         "data_pars": {
             "train": true, 
-            "dt_source": "https://raw.githubusercontent.com/numenta/NAB/master/data/realTweets/Twitter_volume_AMZN.csv",
-      
+            "dt_source": "https://raw.githubusercontent.com/numenta/NAB/master/data/realTweets/Twitter_volume_AMZN.csv",      
               "train_data_path": "dataset/timeseries/stock/qqq_us_train.csv",
               "test_data_path": "dataset/timeseries/stock/qqq_us_test.csv",
             "prediction_length": 60, 
