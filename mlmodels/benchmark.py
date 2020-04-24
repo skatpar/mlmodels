@@ -80,7 +80,6 @@ def benchmark_run(bench_pars=None, args=None, config_mode="test"):
     json_path    = path_norm( args.path_json )
     output_path  = path_norm( args.path_out )
     json_list    = get_all_json_path(json_path)
-
     metric_list  = bench_pars['metric_list']
     bench_df     = pd.DataFrame(columns=["date_run", "model_uri", "json",
                                          "dataset_uri", "metric", "metric_name"])
@@ -91,6 +90,8 @@ def benchmark_run(bench_pars=None, args=None, config_mode="test"):
     log("Model List", json_list)
     ii = -1
     for jsonf in json_list :
+        if jsonf!='gluonts_model.json':
+            break
         log ( f"### Running {jsonf} #####")
         try : 
             log("#### Model URI and Config JSON")
@@ -102,10 +103,12 @@ def benchmark_run(bench_pars=None, args=None, config_mode="test"):
             log("#### Setup Model    ")
             module    = module_load(model_uri)   # "model_tch.torchhub.py"
             model     = module.Model(model_pars, data_pars, compute_pars)
+            print('Module: ',module,'\n Model: ',model)
             
             log("#### Fit ")
             data_pars["train"] = True
             model, session = module.fit(model, data_pars=data_pars, compute_pars=compute_pars, out_pars=out_pars)          
+            # remove    
 
 
             log("#### Inference Need return ypred, ytrue")

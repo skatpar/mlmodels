@@ -280,7 +280,7 @@ def params_json_load(path, config_mode="test",
     import json
     pars = json.load(open(path, mode="r"))
     pars = pars[config_mode]
-
+    
     ### HyperParam, model_pars, data_pars,
     list_pars = []
     for t in tlist :

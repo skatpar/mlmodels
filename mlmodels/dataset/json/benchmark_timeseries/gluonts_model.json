@@ -1,6 +1,7 @@
 {
-    "deepar": {
+    "test": {
          "model_pars": {
+             "model_uri": "model_gluon/gluonts_model.py",
              "model_name" : "deepar",
              "model_pars" : {
                  "freq": "D",
